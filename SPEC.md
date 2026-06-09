@@ -63,6 +63,7 @@ require("scratchpad").setup({
   mappings = {
     toggle   = "x",
     edit     = "<CR>",
+    help     = "g?",
     delete   = "dd",
     add_below = "o",
     add_above = "O",
@@ -107,7 +108,14 @@ All cursor-based commands operate on the task mapped to the current buffer line.
 | `>` | Raise priority |
 | `<` | Lower priority |
 | `q` / `<Esc>` | Close window |
+| `g?` / `<C-w>` | Cheat-sheet of buffer-local keys (which-key `show({ global = false })`, else notification fallback) |
 | `j` / `k` | Move between tasks (native) |
+
+The edit modal binds the same help keys. which-key integration is optional and
+dependency-free: `require("which-key").show({ global = false })` is called under
+`pcall`, so it degrades gracefully to a `vim.notify` cheat-sheet. `<C-w>` is
+remapped buffer-locally so it shows these bindings rather than which-key's
+window menu (the buffer-local map shadows the global window trigger).
 
 All mappings are `<buffer>` local and the buffer is `nomodifiable` + `buftype=nofile`,
 so global `p`, `<`, `>`, `dd` semantics are never disturbed outside the window.

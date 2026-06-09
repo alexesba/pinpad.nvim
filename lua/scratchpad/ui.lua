@@ -29,6 +29,33 @@ function M.task_under_cursor()
   return line_to_task[row]
 end
 
+---Show a cheat-sheet of the current buffer's mappings. Uses which-key (scoped
+---to buffer-local keymaps only) when available, else a notification fallback.
+---@param title? string
+function M.show_help(title)
+  local ok = pcall(function()
+    require("which-key").show({ global = false })
+  end)
+  if ok then
+    return
+  end
+  local buf = vim.api.nvim_get_current_buf()
+  local seen, lines = {}, {}
+  for _, mode in ipairs({ "n", "i" }) do
+    for _, m in ipairs(vim.api.nvim_buf_get_keymap(buf, mode)) do
+      local key = (m.lhs or "") .. "\0" .. (m.desc or "")
+      if m.desc and m.desc ~= "" and not seen[key] then
+        seen[key] = true
+        lines[#lines + 1] = string.format("%-10s %s", m.lhs, m.desc)
+      end
+    end
+  end
+  if #lines == 0 then
+    lines = { "(no mappings)" }
+  end
+  vim.notify((title or "ScratchPad") .. " keys:\n" .. table.concat(lines, "\n"), vim.log.levels.INFO)
+end
+
 ---Move the cursor onto the display line for a given store task index.
 ---Used so the cursor follows a task after it gets re-sorted.
 ---@param index integer
@@ -63,8 +90,6 @@ local function ensure_buf()
   vim.bo[M.buf].bufhidden = "hide"
   vim.bo[M.buf].swapfile = false
   vim.bo[M.buf].filetype = "scratchpad"
-  -- All keys here are buffer-local actions; don't show which-key prefix popups.
-  vim.b[M.buf].which_key_disable = true
   vim.api.nvim_buf_set_name(M.buf, "ScratchPad")
   return M.buf
 end
@@ -240,8 +265,6 @@ function M.edit_entry(index)
   vim.bo[buf].buftype = "nofile"
   vim.bo[buf].bufhidden = "wipe"
   vim.bo[buf].swapfile = false
-  -- Suppress which-key's popup in the editor (e.g. on <C-w>); harmless if unused.
-  vim.b[buf].which_key_disable = true
   vim.api.nvim_buf_set_lines(buf, 0, -1, false, { task.text })
 
   local ui = vim.api.nvim_list_uis()[1]
@@ -290,25 +313,32 @@ function M.edit_entry(index)
     M.render()
   end
 
-  local opts = { buffer = buf, nowait = true, silent = true }
+  local function mapd(mode, lhs, fn, desc)
+    vim.keymap.set(mode, lhs, fn, { buffer = buf, nowait = true, silent = true, desc = desc })
+  end
   -- Flow: <Esc> leaves insert mode (native), then <CR> in normal mode saves & closes.
-  vim.keymap.set("n", "<CR>", function()
+  mapd("n", "<CR>", function()
     finish(true)
-  end, opts)
+  end, "Save & close")
   -- Ctrl-C / q: cancel without saving.
-  vim.keymap.set("i", "<C-c>", function()
+  mapd("i", "<C-c>", function()
     vim.cmd("stopinsert")
     finish(false)
-  end, opts)
-  vim.keymap.set("n", "<C-c>", function()
+  end, "Cancel (discard)")
+  mapd("n", "<C-c>", function()
     finish(false)
-  end, opts)
-  vim.keymap.set("n", "q", function()
+  end, "Cancel (discard)")
+  mapd("n", "q", function()
     finish(false)
-  end, opts)
-  -- Trap focus: disable window-switching commands (<C-w>…) in normal mode so the
-  -- editor can only be left via <CR>/<C-c>/q. (Insert-mode <C-w> word-delete kept.)
-  vim.keymap.set("n", "<C-w>", "<Nop>", opts)
+  end, "Cancel (discard)")
+  mapd("n", "g?", function()
+    M.show_help("Edit task")
+  end, "Show keymaps")
+  -- Repurpose <C-w> to show this editor's bindings (shadows which-key's window
+  -- menu and keeps focus trapped). Insert-mode <C-w> word-delete is kept.
+  mapd("n", "<C-w>", function()
+    M.show_help("Edit task")
+  end, "Show keymaps")
 
   -- Safety net: if focus leaves the editor by any other means, save + close.
   -- Deferred via vim.schedule so window changes happen outside WinLeave textlock

@@ -23,6 +23,7 @@ local M = {}
 ---@field priority_up string|false
 ---@field priority_down string|false
 ---@field quit string|false
+---@field help string|false
 
 ---@class ScratchPadGlobalKeymaps
 ---@field add string|false      -- global shortcut for :TodoAdd
@@ -77,6 +78,7 @@ M.defaults = {
     priority_up = ">",
     priority_down = "<",
     quit = "q",
+    help = "g?",
   },
 
   -- global keymaps (set to false to disable)

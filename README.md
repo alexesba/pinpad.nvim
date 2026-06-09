@@ -84,6 +84,7 @@ require("scratchpad").setup({
     priority_up = ">",
     priority_down = "<",
     quit = "q",
+    help = "g?",                  -- show a cheat-sheet (which-key or notification)
   },
 
   -- global keymaps (set to false to disable)
@@ -116,10 +117,21 @@ require("scratchpad").setup({
 | `p` | Rotate priority `low → medium → high → low` |
 | `>` / `<` | Raise / lower priority |
 | `q` / `<Esc>` | Close window |
+| `g?` / `<C-w>` | Show a cheat-sheet of this buffer's keys (which-key when installed) |
 | `j` / `k` | Move between tasks |
+
+Both `g?` and `<C-w>` show only the current buffer's bindings (the pad's or the
+modal's). If [which-key.nvim](https://github.com/folke/which-key.nvim) is
+installed it renders the popup (buffer-local keys only); otherwise it falls back
+to a notification. `<C-w>` is repurposed here so it shows these bindings instead
+of which-key's window menu.
 
 All in-window mappings are buffer-local, and the buffer is non-modifiable, so
 your global `p`, `dd`, `<`, `>` behavior is never affected elsewhere.
+
+Inside both the pad and the edit modal, `<C-w>` is remapped to show this
+buffer's bindings (instead of which-key's window menu / window-switching). Close
+the pad with `q` / `<Esc>` / `:ScratchPad`.
 
 ## Persistence format
 

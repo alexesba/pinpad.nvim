@@ -146,9 +146,17 @@ function M.attach_mappings(buf)
   map(m.quit, function()
     ui().close()
   end, "ScratchPad: close")
+  map(m.help, function()
+    ui().show_help("ScratchPad")
+  end, "ScratchPad: show keymaps")
   map("<Esc>", function()
     ui().close()
   end, "ScratchPad: close")
+  -- Repurpose <C-w> to show this buffer's bindings instead of which-key's window
+  -- menu (our buffer-local map shadows the global window trigger).
+  map("<C-w>", function()
+    ui().show_help("ScratchPad")
+  end, "ScratchPad: show keymaps")
 end
 
 return M
