@@ -65,6 +65,11 @@ end
 ---@param below boolean  -- insert relative to cursor task
 function M.add_relative(below)
   local cursor_index = ui().task_under_cursor()
+  -- Inherit the neighbour's priority so the new task lands adjacent to it
+  -- (equal priority => stable insertion order keeps it where you put it).
+  -- Falls back to the configured default when there is no task under the cursor.
+  local neighbour = cursor_index and store.tasks[cursor_index]
+  local priority = (neighbour and neighbour.priority) or config.options.default_priority
   vim.ui.input({ prompt = "New task: " }, function(text)
     if not text or vim.trim(text) == "" then
       return
@@ -73,8 +78,17 @@ function M.add_relative(below)
     if cursor_index then
       insert_at = below and (cursor_index + 1) or cursor_index
     end
-    store.add(text, config.options.default_priority, insert_at)
+    local task = store.add(text, priority, insert_at)
     ui().render()
+    if task then
+      -- Keep the cursor on the freshly added task.
+      for i, t in ipairs(store.tasks) do
+        if t.id == task.id then
+          ui().focus_index(i)
+          break
+        end
+      end
+    end
   end)
 end
 
