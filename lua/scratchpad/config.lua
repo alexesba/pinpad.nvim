@@ -33,6 +33,7 @@ local M = {}
 ---@field persist boolean
 ---@field path string|nil
 ---@field default_priority "low"|"medium"|"high"
+---@field add_priority "low"|"medium"|"high"|"ask"|nil
 ---@field show_icons boolean
 ---@field sort boolean
 ---@field open_on_add boolean
@@ -47,6 +48,9 @@ M.defaults = {
   persist = true,
   path = nil, -- nil => stdpath("data").."/scratchpad.json"
   default_priority = "medium",
+  -- Priority for :TodoAdd / <leader>ta quick-capture:
+  -- "low" | "medium" | "high" | "ask" (prompt to choose) | nil (= default_priority)
+  add_priority = "low",
   show_icons = true,
   sort = true, -- auto-sort: pending first, then high->medium->low (stable)
   open_on_add = false, -- open the pad after :TodoAdd (false => quick-capture)

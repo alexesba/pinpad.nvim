@@ -55,6 +55,8 @@ require("scratchpad").setup({
   persist = true,                 -- save/load JSON across sessions
   path = nil,                     -- nil => stdpath("data").."/scratchpad.json"
   default_priority = "medium",    -- "low" | "medium" | "high"
+  add_priority = "low",           -- priority for :TodoAdd / <leader>ta quick-capture:
+                                  -- "low" | "medium" | "high" | "ask" (prompt) | nil
   show_icons = true,              -- colored dots + checkboxes (needs Nerd Font)
   sort = true,                    -- auto-sort: pending first, then high→medium→low
                                   -- (display-only, stable; insertion order kept on disk)
@@ -101,7 +103,7 @@ require("scratchpad").setup({
 |---|---|
 | `:ScratchPad` | Toggle the floating window |
 | `:TodoList` | Open the window |
-| `:TodoAdd [text]` | Add a task (prompts when no text is given). Quick-capture: shows a notification instead of opening the pad (configurable) |
+| `:TodoAdd [text]` | Add a task (prompts when no text is given). Quick-capture: uses `add_priority` (default `low`, or `"ask"` to choose) and notifies instead of opening the pad (configurable) |
 | `:TodoToggle` | Toggle done state of the task under the cursor |
 | `:TodoDelete` | Delete the task under the cursor |
 | `:TodoPriority {low\|medium\|high}` | Set priority of the task under the cursor |

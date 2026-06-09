@@ -85,7 +85,7 @@ When `show_icons = false`, the renderer falls back to text markers:
 | Command | Behavior |
 |---|---|
 | `:ScratchPad` | Toggle the floating window open/closed |
-| `:TodoAdd <text>` | Add a task with `default_priority`; if no text, prompt via `vim.ui.input`. Quick-capture: if the pad is closed, shows a "Task added" notification rather than opening it (`open_on_add`/`notify_on_add`) |
+| `:TodoAdd <text>` | Add a task; if no text, prompt via `vim.ui.input`. Priority comes from `add_priority` (default `low`; `"ask"` prompts via `vim.ui.select`). Quick-capture: if the pad is closed, shows a "Task added" notification rather than opening it (`open_on_add`/`notify_on_add`) |
 | `:TodoToggle` | Toggle done state of task under cursor |
 | `:TodoDelete` | Delete task under cursor |
 | `:TodoList` | Open the window (alias of opening `:ScratchPad`) |

@@ -96,12 +96,12 @@ end
 ---Opens the pad if needed so the result is visible.
 ---@param text? string
 function M.add(text)
-  local function do_add(value)
+  local function do_add(value, priority)
     if not value or vim.trim(value) == "" then
       return
     end
     store.ensure_loaded()
-    local task = store.add(value, config.options.default_priority)
+    local task = store.add(value, priority)
     if ui().is_open() then
       -- Already visible: just refresh in place.
       ui().render()
@@ -115,10 +115,26 @@ function M.add(text)
     end
   end
 
+  -- Resolve the quick-capture priority, optionally prompting the user.
+  local function with_priority(value)
+    if not value or vim.trim(value) == "" then
+      return
+    end
+    local mode = config.options.add_priority
+    if mode == "ask" then
+      vim.ui.select({ "low", "medium", "high" }, { prompt = "Priority:" }, function(choice)
+        do_add(value, choice or config.options.default_priority)
+      end)
+    else
+      local priority = store.is_valid_priority(mode) and mode or config.options.default_priority
+      do_add(value, priority)
+    end
+  end
+
   if text and vim.trim(text) ~= "" then
-    do_add(text)
+    with_priority(text)
   else
-    vim.ui.input({ prompt = "New task: " }, do_add)
+    vim.ui.input({ prompt = "New task: " }, with_priority)
   end
 end
 
