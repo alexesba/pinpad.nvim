@@ -116,6 +116,9 @@ All cursor-based commands operate on the task mapped to the current buffer line.
 | `<` | Lower priority |
 | `D` | Set/clear due date (prompts via `vim.ui.input`; parses ISO + relative input via `date.parse`; blank/`clear` removes it) |
 | `T` | Toggle today/overdue filter (shows only tasks with `due` today or in the past; title appends `(today)`) |
+| `/` | Search/filter by task text (case-insensitive substring; blank clears) |
+| `f` | Cycle done filter: all → pending → done → all |
+| `F` | Cycle priority filter: all → high → medium → low → all |
 | `q` / `<Esc>` | Close window |
 | `g?` / `<C-w>` | Cheat-sheet of buffer-local keys (which-key `show({ global = false })`, else notification fallback) |
 | `j` / `k` | Move between tasks (native) |
@@ -188,8 +191,10 @@ Example (icons on):
   first, undated last) when `sort_by_due = true`. Done items sink to the bottom.
   Stable tiebreak on insertion order. Display-only — on-disk order is the raw
   insertion order. The cursor follows a task when its priority/done changes.
-- Filter (`filter = "today"`): display-only subset — tasks whose `due` is today
-  or overdue. Toggled with `T`; reset to `all` when the window closes.
+- Filter (`PinPadViewFilter`): composable display-only filters — `today`
+  (overdue + due today), `query` (text search), `done` (all/pending/done),
+  `priority` (nil or a level). Toggled via `T`, `/`, `f`, `F`; reset when
+  the window closes. Title shows active filter parts.
 
 ---
 
