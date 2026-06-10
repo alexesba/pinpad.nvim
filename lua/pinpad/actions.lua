@@ -124,6 +124,11 @@ function M.set_due(preset)
   end
 end
 
+---Toggle the today/overdue filter in the pad.
+function M.toggle_today_filter()
+  ui().toggle_today_filter()
+end
+
 ---Restore the most recently deleted task(s).
 function M.undo()
   store.ensure_loaded()
@@ -286,6 +291,7 @@ function M.attach_mappings(buf)
   map(m.set_due, function()
     M.set_due()
   end, "PinPad: set due date")
+  map(m.filter_today, M.toggle_today_filter, "PinPad: toggle today filter")
   map(m.undo, M.undo, "PinPad: undo delete")
   map(m.quit, function()
     ui().close()

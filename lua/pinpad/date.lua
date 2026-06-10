@@ -138,4 +138,25 @@ function M.status(due, ref)
   return "later"
 end
 
+---Numeric sort key for a due date (ascending = earliest first). Undated tasks
+---sort last within the same priority group.
+---@param due string|nil
+---@return integer
+function M.sort_key(due)
+  if not due or not M.is_valid(due) then
+    return 99999999
+  end
+  local compact = due:gsub("%-", "")
+  return tonumber(compact) or 99999999
+end
+
+---Whether a due date is today or overdue (for the "today" filter view).
+---@param due string
+---@param ref? string
+---@return boolean
+function M.is_due_today_or_overdue(due, ref)
+  local d = M.diff_days(ref or M.today(), due)
+  return d ~= nil and d <= 0
+end
+
 return M

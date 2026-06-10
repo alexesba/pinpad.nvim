@@ -2,6 +2,7 @@ local config = require("pinpad.config")
 local store = require("pinpad.store")
 local hl = require("pinpad.highlights")
 local date = require("pinpad.date")
+local sort = require("pinpad.sort")
 
 local M = {}
 
@@ -14,6 +15,10 @@ M.win = nil
 ---Map from buffer line (1-based) -> task index. nil entries are non-task lines.
 ---@type table<integer, integer>
 local line_to_task = {}
+
+---Active list filter: "all" shows everything; "today" shows overdue + due today.
+---@type "all"|"today"
+M.filter = "all"
 
 ---@return boolean
 function M.is_open()
@@ -156,6 +161,18 @@ local function format_task(task)
   return line, highlights
 end
 
+---Refresh the floating window title to reflect the active filter.
+local function update_title()
+  if not M.is_open() then
+    return
+  end
+  local title = config.options.window.title
+  if M.filter == "today" then
+    title = vim.trim(title) .. " (today) "
+  end
+  vim.api.nvim_win_set_config(M.win, { title = title })
+end
+
 function M.render()
   if not (M.buf and vim.api.nvim_buf_is_valid(M.buf)) then
     return
@@ -166,47 +183,38 @@ function M.render()
 
   ---@type PinPadTask[]
   local tasks = store.tasks
+  local view = {}
+  for i, t in ipairs(tasks) do
+    if sort.passes_filter(t, M.filter) then
+      view[#view + 1] = { task = t, idx = i }
+    end
+  end
+
   if config.options.sort then
-    -- non-destructive ordered view: pending first, then by priority desc.
-    -- Tiebreak on the original index so equal items keep a stable order
-    -- (table.sort is not stable on its own).
-    local order = { high = 3, medium = 2, low = 1 }
-    local view = {}
-    for i, t in ipairs(tasks) do
-      view[i] = { task = t, idx = i }
-    end
+    -- non-destructive ordered view: pending first, priority desc, optional due asc.
     table.sort(view, function(a, b)
-      if a.task.done ~= b.task.done then
-        return not a.task.done
-      end
-      local pa = order[a.task.priority] or 0
-      local pb = order[b.task.priority] or 0
-      if pa ~= pb then
-        return pa > pb
-      end
-      return a.idx < b.idx
+      return sort.compare(a, b, config.options.sort_by_due)
     end)
-    tasks = {}
-    for _, v in ipairs(view) do
-      tasks[#tasks + 1] = v.task
-      -- keep mapping to the real store index
-      line_to_task[#tasks] = v.idx
-    end
+  end
+
+  tasks = {}
+  for display_i, v in ipairs(view) do
+    tasks[display_i] = v.task
+    line_to_task[display_i] = v.idx
   end
 
   local lines = {}
   local hl_specs = {}
 
-  if #tasks == 0 then
+  if #store.tasks == 0 then
     lines = { "", "  No tasks — press \"o\" to add one.", "" }
+  elseif #tasks == 0 then
+    lines = { "", "  No tasks due today — press T to show all.", "" }
   else
     for display_i, task in ipairs(tasks) do
       local line, highlights = format_task(task)
       lines[display_i] = line
       hl_specs[display_i] = highlights
-      if not config.options.sort then
-        line_to_task[display_i] = display_i
-      end
     end
   end
 
@@ -214,7 +222,7 @@ function M.render()
   vim.api.nvim_buf_set_lines(M.buf, 0, -1, false, lines)
   vim.api.nvim_buf_clear_namespace(M.buf, ns, 0, -1)
 
-  if #tasks == 0 then
+  if #store.tasks == 0 or (#tasks == 0 and M.filter == "today") then
     vim.api.nvim_buf_set_extmark(M.buf, ns, 1, 0, { end_col = #lines[2], hl_group = hl.groups.hint })
   else
     for display_i, highlights in pairs(hl_specs) do
@@ -231,6 +239,23 @@ function M.render()
   end
 
   vim.bo[M.buf].modifiable = false
+  update_title()
+end
+
+---Toggle between all tasks and the today/overdue filter.
+function M.toggle_today_filter()
+  M.filter = M.filter == "today" and "all" or "today"
+  M.render()
+end
+
+---Open the pad showing only tasks due today or overdue.
+function M.show_today()
+  M.filter = "today"
+  if M.is_open() then
+    M.render()
+  else
+    M.open()
+  end
 end
 
 function M.open()
@@ -272,6 +297,7 @@ function M.close()
     vim.api.nvim_win_close(M.win, true)
   end
   M.win = nil
+  M.filter = "all"
 end
 
 function M.toggle()
