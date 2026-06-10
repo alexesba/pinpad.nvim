@@ -16,9 +16,9 @@ M.win = nil
 ---@type table<integer, integer>
 local line_to_task = {}
 
----Active list filter: "all" shows everything; "today" shows overdue + due today.
----@type "all"|"today"
-M.filter = "all"
+---Active view filter (today, text search, done state, priority).
+---@type PinPadViewFilter
+M.view_filter = sort.default_filter()
 
 ---@return boolean
 function M.is_open()
@@ -161,16 +161,22 @@ local function format_task(task)
   return line, highlights
 end
 
----Refresh the floating window title to reflect the active filter.
+---Refresh the floating window title to reflect active filters.
 local function update_title()
   if not M.is_open() then
     return
   end
   local title = config.options.window.title
-  if M.filter == "today" then
-    title = vim.trim(title) .. " (today) "
+  local suffix = sort.filter_title_suffix(M.view_filter)
+  if suffix then
+    title = vim.trim(title) .. " (" .. suffix .. ") "
   end
   vim.api.nvim_win_set_config(M.win, { title = title })
+end
+
+---Reset all view filters to defaults.
+function M.reset_filters()
+  M.view_filter = sort.default_filter()
 end
 
 function M.render()
@@ -185,7 +191,7 @@ function M.render()
   local tasks = store.tasks
   local view = {}
   for i, t in ipairs(tasks) do
-    if sort.passes_filter(t, M.filter) then
+    if sort.passes_filter(t, M.view_filter) then
       view[#view + 1] = { task = t, idx = i }
     end
   end
@@ -209,7 +215,7 @@ function M.render()
   if #store.tasks == 0 then
     lines = { "", "  No tasks — press \"o\" to add one.", "" }
   elseif #tasks == 0 then
-    lines = { "", "  No tasks due today — press T to show all.", "" }
+    lines = { "", "  No matching tasks — / search, f status, F priority, T today.", "" }
   else
     for display_i, task in ipairs(tasks) do
       local line, highlights = format_task(task)
@@ -222,7 +228,7 @@ function M.render()
   vim.api.nvim_buf_set_lines(M.buf, 0, -1, false, lines)
   vim.api.nvim_buf_clear_namespace(M.buf, ns, 0, -1)
 
-  if #store.tasks == 0 or (#tasks == 0 and M.filter == "today") then
+  if #store.tasks == 0 or (#tasks == 0 and sort.filter_active(M.view_filter)) then
     vim.api.nvim_buf_set_extmark(M.buf, ns, 1, 0, { end_col = #lines[2], hl_group = hl.groups.hint })
   else
     for display_i, highlights in pairs(hl_specs) do
@@ -242,15 +248,15 @@ function M.render()
   update_title()
 end
 
----Toggle between all tasks and the today/overdue filter.
+---Toggle the today/overdue filter.
 function M.toggle_today_filter()
-  M.filter = M.filter == "today" and "all" or "today"
+  M.view_filter.today = not M.view_filter.today
   M.render()
 end
 
 ---Open the pad showing only tasks due today or overdue.
 function M.show_today()
-  M.filter = "today"
+  M.view_filter.today = true
   if M.is_open() then
     M.render()
   else
@@ -297,7 +303,7 @@ function M.close()
     vim.api.nvim_win_close(M.win, true)
   end
   M.win = nil
-  M.filter = "all"
+  M.reset_filters()
 end
 
 function M.toggle()

@@ -144,6 +144,41 @@ function M.clear_done()
   )
 end
 
+---Prompt for a text search filter (/ in the pad).
+function M.search()
+  local vf = ui().view_filter
+  vim.ui.input({ prompt = "Search: ", default = vf.query or "" }, function(query)
+    if query == nil then
+      return
+    end
+    query = vim.trim(query)
+    vf.query = query == "" and nil or query
+    ui().render()
+    if vf.query then
+      vim.notify('[PinPad] Filter: "' .. vf.query .. '"', vim.log.levels.INFO)
+    else
+      vim.notify("[PinPad] Search cleared", vim.log.levels.INFO)
+    end
+  end)
+end
+
+---Cycle the done-state filter: all → pending → done.
+function M.cycle_done_filter()
+  local vf = ui().view_filter
+  vf.done = require("pinpad.sort").cycle_done(vf.done)
+  ui().render()
+  vim.notify("[PinPad] Show: " .. vf.done, vim.log.levels.INFO)
+end
+
+---Cycle the priority filter: all → high → medium → low.
+function M.cycle_priority_filter()
+  local vf = ui().view_filter
+  vf.priority = require("pinpad.sort").cycle_priority(vf.priority)
+  ui().render()
+  local label = vf.priority or "all"
+  vim.notify("[PinPad] Priority: " .. label, vim.log.levels.INFO)
+end
+
 ---Restore the most recently deleted task(s).
 function M.undo()
   store.ensure_loaded()
@@ -308,6 +343,9 @@ function M.attach_mappings(buf)
   end, "PinPad: set due date")
   map(m.filter_today, M.toggle_today_filter, "PinPad: toggle today filter")
   map(m.clear_done, M.clear_done, "PinPad: clear completed tasks")
+  map(m.search, M.search, "PinPad: search tasks")
+  map(m.filter_done, M.cycle_done_filter, "PinPad: cycle done filter")
+  map(m.filter_priority, M.cycle_priority_filter, "PinPad: cycle priority filter")
   map(m.undo, M.undo, "PinPad: undo delete")
   map(m.quit, function()
     ui().close()
