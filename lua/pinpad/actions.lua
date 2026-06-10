@@ -84,6 +84,21 @@ function M.toggle_visual()
   ui().render()
 end
 
+---Restore the most recently deleted task(s).
+function M.undo()
+  store.ensure_loaded()
+  local restored = store.undo()
+  if restored == 0 then
+    vim.notify("[PinPad] Nothing to undo", vim.log.levels.INFO)
+    return
+  end
+  ui().render()
+  vim.notify(
+    string.format("[PinPad] Restored %d task%s", restored, restored == 1 and "" or "s"),
+    vim.log.levels.INFO
+  )
+end
+
 function M.rotate_priority()
   with_cursor_task(function(i)
     store.rotate_priority(i)
@@ -228,6 +243,7 @@ function M.attach_mappings(buf)
   map(m.rotate_priority, M.rotate_priority, "PinPad: rotate priority")
   map(m.priority_up, M.priority_up, "PinPad: raise priority")
   map(m.priority_down, M.priority_down, "PinPad: lower priority")
+  map(m.undo, M.undo, "PinPad: undo delete")
   map(m.quit, function()
     ui().close()
   end, "PinPad: close")

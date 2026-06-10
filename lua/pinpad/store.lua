@@ -17,6 +17,26 @@ M.PRIORITIES = PRIORITIES
 local loaded = false
 local id_counter = 0
 
+-- Undo stack for destructive ops. Each entry is a "transaction" of removed
+-- tasks plus their original positions, newest last. Bounded to keep memory flat.
+local MAX_UNDO = 25
+---@type { items: { index: integer, task: PinPadTask }[] }[]
+M._undo = {}
+
+---@param t PinPadTask
+---@return PinPadTask
+local function copy_task(t)
+  return { id = t.id, text = t.text, done = t.done, priority = t.priority }
+end
+
+---@param entry { items: { index: integer, task: PinPadTask }[] }
+local function push_undo(entry)
+  M._undo[#M._undo + 1] = entry
+  if #M._undo > MAX_UNDO then
+    table.remove(M._undo, 1)
+  end
+end
+
 ---@return string
 local function next_id()
   id_counter = id_counter + 1
@@ -156,9 +176,11 @@ end
 
 ---@param index integer
 function M.delete(index)
-  if not M.tasks[index] then
+  local t = M.tasks[index]
+  if not t then
     return
   end
+  push_undo({ items = { { index = index, task = copy_task(t) } } })
   table.remove(M.tasks, index)
   M.save()
 end
@@ -193,19 +215,40 @@ function M.delete_ids(ids)
   for _, id in ipairs(ids) do
     set[id] = true
   end
-  local kept, removed = {}, 0
-  for _, t in ipairs(M.tasks) do
+  local kept, items = {}, {}
+  for i, t in ipairs(M.tasks) do
     if set[t.id] then
-      removed = removed + 1
+      items[#items + 1] = { index = i, task = copy_task(t) }
     else
       kept[#kept + 1] = t
     end
   end
-  if removed > 0 then
+  if #items > 0 then
+    push_undo({ items = items })
     M.tasks = kept
     M.save()
   end
-  return removed
+  return #items
+end
+
+---Restore the tasks removed by the most recent delete. Re-inserts them at their
+---original positions (clamped if the list has since changed). Returns the count.
+---@return integer
+function M.undo()
+  local entry = table.remove(M._undo)
+  if not entry then
+    return 0
+  end
+  -- Ascending original index keeps positions valid as we re-insert.
+  table.sort(entry.items, function(a, b)
+    return a.index < b.index
+  end)
+  for _, it in ipairs(entry.items) do
+    local idx = math.max(1, math.min(#M.tasks + 1, it.index))
+    table.insert(M.tasks, idx, it.task)
+  end
+  M.save()
+  return #entry.items
 end
 
 ---@param index integer
