@@ -1,11 +1,7 @@
-# ScratchPad.nvim
+# pinpad.nvim
 
 A floating **todo-list** inside Neovim, written in Lua. Add, complete, prioritize,
 and delete tasks with Vim-style keys — with optional JSON persistence across sessions.
-
-> ⚠️ The name `scratchpad.nvim` is already taken on GitHub
-> ([athar-qadri/scratchpad.nvim](https://github.com/athar-qadri/scratchpad.nvim)).
-> A final, unique name is still **TBD** before publishing.
 
 ---
 
@@ -18,7 +14,7 @@ and delete tasks with Vim-style keys — with optional JSON persistence across s
   `x` to toggle done on all of them.
 - Colored priority dots + checkboxes, with a plain-text fallback.
 - Vim-native, buffer-local mappings (`x`, `dd`, `o`, `O`, `p`, `>`, `<`).
-- Optional JSON persistence at `stdpath("data")/scratchpad.json`.
+- Optional JSON persistence at `stdpath("data")/pinpad.json`.
 - Global shortcuts to add a todo or toggle the pad.
 
 ## Requirements
@@ -33,17 +29,17 @@ and delete tasks with Vim-style keys — with optional JSON persistence across s
 ### lazy.nvim
 ```lua
 {
-  "you/scratchpad.nvim", -- name TBD
-  opts = {},             -- calls require("scratchpad").setup(opts)
+  "you/pinpad.nvim",
+  opts = {},             -- calls require("pinpad").setup(opts)
 }
 ```
 
 ### packer.nvim
 ```lua
 use({
-  "you/scratchpad.nvim",
+  "you/pinpad.nvim",
   config = function()
-    require("scratchpad").setup()
+    require("pinpad").setup()
   end,
 })
 ```
@@ -53,9 +49,9 @@ use({
 Defaults shown below; pass any subset to `setup()`.
 
 ```lua
-require("scratchpad").setup({
+require("pinpad").setup({
   persist = true,                 -- save/load JSON across sessions
-  path = nil,                     -- nil => stdpath("data").."/scratchpad.json"
+  path = nil,                     -- nil => stdpath("data").."/pinpad.json"
   default_priority = "medium",    -- "low" | "medium" | "high"
   add_priority = "low",           -- priority for :TodoAdd / <leader>ta quick-capture:
                                   -- "low" | "medium" | "high" | "ask" (prompt) | nil
@@ -69,7 +65,7 @@ require("scratchpad").setup({
     width = 0.5,                  -- ratio (0-1) of editor, or absolute columns (> 1)
     height = 0.6,
     border = "rounded",
-    title = " ScratchPad ",
+    title = " PinPad ",
   },
 
   icons = {
@@ -94,7 +90,7 @@ require("scratchpad").setup({
   -- global keymaps (set to false to disable)
   keymaps = {
     add = "<leader>ta",           -- :TodoAdd
-    toggle = "<leader>tp",        -- :ScratchPad (toggle the pad)
+    toggle = "<leader>tp",        -- :PinPad (toggle the pad)
   },
 })
 ```
@@ -103,7 +99,7 @@ require("scratchpad").setup({
 
 | Command | Description |
 |---|---|
-| `:ScratchPad` | Toggle the floating window |
+| `:PinPad` | Toggle the floating window |
 | `:TodoList` | Open the window |
 | `:TodoAdd [text]` | Add a task (prompts when no text is given). Quick-capture: uses `add_priority` (default `low`, or `"ask"` to choose) and notifies instead of opening the pad (configurable) |
 | `:TodoToggle` | Toggle done state of the task under the cursor |
@@ -137,7 +133,7 @@ your global `p`, `dd`, `<`, `>` behavior is never affected elsewhere.
 
 Inside both the pad and the edit modal, `<C-w>` is remapped to show this
 buffer's bindings (instead of which-key's window menu / window-switching). Close
-the pad with `q` / `<Esc>` / `:ScratchPad`.
+the pad with `q` / `<Esc>` / `:PinPad`.
 
 ## Persistence format
 

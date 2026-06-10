@@ -1,11 +1,11 @@
-local config = require("scratchpad.config")
-local store = require("scratchpad.store")
+local config = require("pinpad.config")
+local store = require("pinpad.store")
 
 local M = {}
 
 ---Lazily require ui to avoid a circular require at load time.
 local function ui()
-  return require("scratchpad.ui")
+  return require("pinpad.ui")
 end
 
 ---Run a mutation against the task under the cursor, then re-render.
@@ -37,7 +37,7 @@ end
 
 ---Resolve the task ids covered by the current visual selection, then leave
 ---visual mode so window/buffer state is settled before any re-render.
----@return string[] ids, ScratchPadTask[] tasks
+---@return string[] ids, PinPadTask[] tasks
 local function visual_selection()
   local first = vim.fn.line("v")
   local last = vim.fn.line(".")
@@ -62,7 +62,7 @@ function M.delete_visual()
   local removed = store.delete_ids(ids)
   ui().render()
   if removed > 0 then
-    vim.notify(string.format("[ScratchPad] Deleted %d task%s", removed, removed == 1 and "" or "s"), vim.log.levels.INFO)
+    vim.notify(string.format("[PinPad] Deleted %d task%s", removed, removed == 1 and "" or "s"), vim.log.levels.INFO)
   end
 end
 
@@ -159,7 +159,7 @@ function M.add(text)
         ui().open()
       end
       if task and config.options.notify_on_add then
-        vim.notify("[ScratchPad] Task added: " .. task.text, vim.log.levels.INFO)
+        vim.notify("[PinPad] Task added: " .. task.text, vim.log.levels.INFO)
       end
     end
   end
@@ -191,7 +191,7 @@ end
 ---@param priority "low"|"medium"|"high"
 function M.set_priority_cursor(priority)
   if not store.is_valid_priority(priority) then
-    vim.notify("[ScratchPad] Invalid priority: " .. tostring(priority), vim.log.levels.ERROR)
+    vim.notify("[PinPad] Invalid priority: " .. tostring(priority), vim.log.levels.ERROR)
     return
   end
   with_cursor_task(function(i)
@@ -199,7 +199,7 @@ function M.set_priority_cursor(priority)
   end, true)
 end
 
----Attach buffer-local mappings to the scratchpad buffer.
+---Attach buffer-local mappings to the pinpad buffer.
 ---@param buf integer
 function M.attach_mappings(buf)
   local m = config.options.mappings
@@ -210,38 +210,38 @@ function M.attach_mappings(buf)
     vim.keymap.set("n", lhs, fn, { buffer = buf, nowait = true, silent = true, desc = desc })
   end
 
-  map(m.toggle, M.toggle, "ScratchPad: toggle done")
-  map(m.edit, M.edit, "ScratchPad: edit task text")
-  map(m.delete, M.delete, "ScratchPad: delete task")
+  map(m.toggle, M.toggle, "PinPad: toggle done")
+  map(m.edit, M.edit, "PinPad: edit task text")
+  map(m.delete, M.delete, "PinPad: delete task")
   -- Visual selection mirrors normal mode: d = delete, x = toggle done (bulk).
   local vmap = function(lhs, fn, desc)
     vim.keymap.set("x", lhs, fn, { buffer = buf, nowait = true, silent = true, desc = desc })
   end
-  vmap("d", M.delete_visual, "ScratchPad: delete selected tasks")
-  vmap("x", M.toggle_visual, "ScratchPad: toggle selected done")
+  vmap("d", M.delete_visual, "PinPad: delete selected tasks")
+  vmap("x", M.toggle_visual, "PinPad: toggle selected done")
   map(m.add_below, function()
     M.add_relative(true)
-  end, "ScratchPad: add below")
+  end, "PinPad: add below")
   map(m.add_above, function()
     M.add_relative(false)
-  end, "ScratchPad: add above")
-  map(m.rotate_priority, M.rotate_priority, "ScratchPad: rotate priority")
-  map(m.priority_up, M.priority_up, "ScratchPad: raise priority")
-  map(m.priority_down, M.priority_down, "ScratchPad: lower priority")
+  end, "PinPad: add above")
+  map(m.rotate_priority, M.rotate_priority, "PinPad: rotate priority")
+  map(m.priority_up, M.priority_up, "PinPad: raise priority")
+  map(m.priority_down, M.priority_down, "PinPad: lower priority")
   map(m.quit, function()
     ui().close()
-  end, "ScratchPad: close")
+  end, "PinPad: close")
   map(m.help, function()
-    ui().show_help("ScratchPad")
-  end, "ScratchPad: show keymaps")
+    ui().show_help("PinPad")
+  end, "PinPad: show keymaps")
   map("<Esc>", function()
     ui().close()
-  end, "ScratchPad: close")
+  end, "PinPad: close")
   -- Repurpose <C-w> to show this buffer's bindings instead of which-key's window
   -- menu (our buffer-local map shadows the global window trigger).
   map("<C-w>", function()
-    ui().show_help("ScratchPad")
-  end, "ScratchPad: show keymaps")
+    ui().show_help("PinPad")
+  end, "PinPad: show keymaps")
 end
 
 return M

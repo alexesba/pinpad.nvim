@@ -1,10 +1,10 @@
-local config = require("scratchpad.config")
-local store = require("scratchpad.store")
-local hl = require("scratchpad.highlights")
+local config = require("pinpad.config")
+local store = require("pinpad.store")
+local hl = require("pinpad.highlights")
 
 local M = {}
 
-local ns = vim.api.nvim_create_namespace("ScratchPad")
+local ns = vim.api.nvim_create_namespace("PinPad")
 
 ---@type integer|nil
 M.buf = nil
@@ -53,7 +53,7 @@ function M.show_help(title)
   if #lines == 0 then
     lines = { "(no mappings)" }
   end
-  vim.notify((title or "ScratchPad") .. " keys:\n" .. table.concat(lines, "\n"), vim.log.levels.INFO)
+  vim.notify((title or "PinPad") .. " keys:\n" .. table.concat(lines, "\n"), vim.log.levels.INFO)
 end
 
 ---Resolve the store task indices for an inclusive range of display lines.
@@ -107,12 +107,12 @@ local function ensure_buf()
   vim.bo[M.buf].buftype = "nofile"
   vim.bo[M.buf].bufhidden = "hide"
   vim.bo[M.buf].swapfile = false
-  vim.bo[M.buf].filetype = "scratchpad"
-  vim.api.nvim_buf_set_name(M.buf, "ScratchPad")
+  vim.bo[M.buf].filetype = "pinpad"
+  vim.api.nvim_buf_set_name(M.buf, "PinPad")
   return M.buf
 end
 
----@param task ScratchPadTask
+---@param task PinPadTask
 ---@return string line, table[] highlights  -- highlights: {group, col_start, col_end}
 local function format_task(task)
   local opts = config.options
@@ -148,7 +148,7 @@ function M.render()
   store.ensure_loaded()
   line_to_task = {}
 
-  ---@type ScratchPadTask[]
+  ---@type PinPadTask[]
   local tasks = store.tasks
   if config.options.sort then
     -- non-destructive ordered view: pending first, then by priority desc.
@@ -247,7 +247,7 @@ function M.open()
   vim.wo[M.win].cursorline = true
   vim.wo[M.win].wrap = false
 
-  require("scratchpad.actions").attach_mappings(M.buf)
+  require("pinpad.actions").attach_mappings(M.buf)
   M.render()
 end
 
@@ -307,7 +307,7 @@ function M.edit_entry(index)
   vim.wo[win].wrap = false
 
   local closed = false
-  local group = vim.api.nvim_create_augroup("ScratchPadEdit_" .. buf, { clear = true })
+  local group = vim.api.nvim_create_augroup("PinPadEdit_" .. buf, { clear = true })
   ---@param save boolean
   local function finish(save)
     if closed then

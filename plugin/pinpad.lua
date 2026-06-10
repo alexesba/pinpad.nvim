@@ -1,19 +1,19 @@
-if vim.g.loaded_scratchpad then
+if vim.g.loaded_pinpad then
   return
 end
-vim.g.loaded_scratchpad = true
+vim.g.loaded_pinpad = true
 
 local function sp()
-  return require("scratchpad")
+  return require("pinpad")
 end
 
-vim.api.nvim_create_user_command("ScratchPad", function()
+vim.api.nvim_create_user_command("PinPad", function()
   sp().toggle()
-end, { desc = "Toggle the ScratchPad todo window" })
+end, { desc = "Toggle the PinPad todo window" })
 
 vim.api.nvim_create_user_command("TodoList", function()
   sp().open()
-end, { desc = "Open the ScratchPad todo window" })
+end, { desc = "Open the PinPad todo window" })
 
 vim.api.nvim_create_user_command("TodoAdd", function(opts)
   sp().add(opts.args ~= "" and opts.args or nil)

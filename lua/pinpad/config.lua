@@ -1,19 +1,19 @@
 local M = {}
 
----@class ScratchPadWindowOpts
+---@class PinPadWindowOpts
 ---@field width number      -- ratio (0-1) of editor width, or absolute columns when > 1
 ---@field height number     -- ratio (0-1) of editor height, or absolute rows when > 1
 ---@field border string     -- any nvim border style
 ---@field title string
 
----@class ScratchPadIcons
+---@class PinPadIcons
 ---@field done string
 ---@field todo string
 ---@field high string
 ---@field medium string
 ---@field low string
 
----@class ScratchPadMappings
+---@class PinPadMappings
 ---@field toggle string|false
 ---@field edit string|false
 ---@field delete string|false
@@ -25,11 +25,11 @@ local M = {}
 ---@field quit string|false
 ---@field help string|false
 
----@class ScratchPadGlobalKeymaps
+---@class PinPadGlobalKeymaps
 ---@field add string|false      -- global shortcut for :TodoAdd
----@field toggle string|false   -- global shortcut for :ScratchPad
+---@field toggle string|false   -- global shortcut for :PinPad
 
----@class ScratchPadConfig
+---@class PinPadConfig
 ---@field persist boolean
 ---@field path string|nil
 ---@field default_priority "low"|"medium"|"high"
@@ -38,15 +38,15 @@ local M = {}
 ---@field sort boolean
 ---@field open_on_add boolean
 ---@field notify_on_add boolean
----@field window ScratchPadWindowOpts
----@field icons ScratchPadIcons
----@field mappings ScratchPadMappings
----@field keymaps ScratchPadGlobalKeymaps
+---@field window PinPadWindowOpts
+---@field icons PinPadIcons
+---@field mappings PinPadMappings
+---@field keymaps PinPadGlobalKeymaps
 
----@type ScratchPadConfig
+---@type PinPadConfig
 M.defaults = {
   persist = true,
-  path = nil, -- nil => stdpath("data").."/scratchpad.json"
+  path = nil, -- nil => stdpath("data").."/pinpad.json"
   default_priority = "medium",
   -- Priority for :TodoAdd / <leader>ta quick-capture:
   -- "low" | "medium" | "high" | "ask" (prompt to choose) | nil (= default_priority)
@@ -60,7 +60,7 @@ M.defaults = {
     width = 0.5,
     height = 0.6,
     border = "rounded",
-    title = " ScratchPad ",
+    title = " PinPad ",
   },
 
   icons = {
@@ -88,15 +88,15 @@ M.defaults = {
   -- global keymaps (set to false to disable)
   keymaps = {
     add = "<leader>ta", -- :TodoAdd
-    toggle = "<leader>tp", -- :ScratchPad (toggle pad)
+    toggle = "<leader>tp", -- :PinPad (toggle pad)
   },
 }
 
----@type ScratchPadConfig
+---@type PinPadConfig
 M.options = vim.deepcopy(M.defaults)
 
----@param opts ScratchPadConfig|nil
----@return ScratchPadConfig
+---@param opts PinPadConfig|nil
+---@return PinPadConfig
 function M.setup(opts)
   M.options = vim.tbl_deep_extend("force", vim.deepcopy(M.defaults), opts or {})
   return M.options
@@ -108,7 +108,7 @@ function M.resolve_path()
   if M.options.path and M.options.path ~= "" then
     return vim.fn.expand(M.options.path)
   end
-  return vim.fs.joinpath(vim.fn.stdpath("data"), "scratchpad.json")
+  return vim.fs.joinpath(vim.fn.stdpath("data"), "pinpad.json")
 end
 
 return M

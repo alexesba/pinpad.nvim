@@ -1,11 +1,11 @@
 local M = {}
 
 M.groups = {
-  high = "ScratchPadHigh",
-  medium = "ScratchPadMedium",
-  low = "ScratchPadLow",
-  done = "ScratchPadDone",
-  hint = "ScratchPadHint",
+  high = "PinPadHigh",
+  medium = "PinPadMedium",
+  low = "PinPadLow",
+  done = "PinPadDone",
+  hint = "PinPadHint",
 }
 
 ---Define default highlight groups (only sets defaults; user overrides win).

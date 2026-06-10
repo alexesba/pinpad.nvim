@@ -1,4 +1,4 @@
-# ScratchPad.nvim — Specification
+# pinpad.nvim — Specification
 
 A floating todo-list inside Neovim, written in Lua, with Vim-style navigation,
 priority levels, and JSON persistence across sessions.
@@ -27,7 +27,7 @@ priority levels, and JSON persistence across sessions.
 
 | Decision | Choice |
 |---|---|
-| Persistence path | `vim.fn.stdpath("data") .. "/scratchpad.json"` (i.e. `~/.local/share/nvim/`) |
+| Persistence path | `vim.fn.stdpath("data") .. "/pinpad.json"` (i.e. `~/.local/share/nvim/`) |
 | Priority keys | Keep **both**: `p` rotates `low→medium→high→low`, and `>` / `<` raise/lower |
 | Buffer mode | **Managed / non-editable**: user acts on lines via mappings, not free text edit |
 | Default priority | `medium` |
@@ -38,9 +38,9 @@ priority levels, and JSON persistence across sessions.
 ## 3. Configuration API
 
 ```lua
-require("scratchpad").setup({
+require("pinpad").setup({
   persist = true,                 -- save/load JSON across sessions
-  path = nil,                     -- nil => stdpath("data").."/scratchpad.json"
+  path = nil,                     -- nil => stdpath("data").."/pinpad.json"
   default_priority = "medium",    -- "low" | "medium" | "high"
   show_icons = true,              -- colored priority dots + checkboxes
 
@@ -48,15 +48,15 @@ require("scratchpad").setup({
     width = 0.5,                  -- ratio (0-1) of editor width, or absolute int > 1
     height = 0.6,                 -- ratio (0-1) of editor height, or absolute int > 1
     border = "rounded",          -- any nvim border style
-    title = " ScratchPad ",
+    title = " PinPad ",
   },
 
   icons = {
     done = "☑",                  -- shown for completed
     todo = "☐",                  -- shown for pending
-    high = "●",                  -- colored red via ScratchPadHigh
-    medium = "●",                -- colored amber via ScratchPadMedium
-    low = "●",                   -- colored green via ScratchPadLow
+    high = "●",                  -- colored red via PinPadHigh
+    medium = "●",                -- colored amber via PinPadMedium
+    low = "●",                   -- colored green via PinPadLow
   },
 
   -- buffer-local mappings (set to false to disable a binding)
@@ -84,11 +84,11 @@ When `show_icons = false`, the renderer falls back to text markers:
 
 | Command | Behavior |
 |---|---|
-| `:ScratchPad` | Toggle the floating window open/closed |
+| `:PinPad` | Toggle the floating window open/closed |
 | `:TodoAdd <text>` | Add a task; if no text, prompt via `vim.ui.input`. Priority comes from `add_priority` (default `low`; `"ask"` prompts via `vim.ui.select`). Quick-capture: if the pad is closed, shows a "Task added" notification rather than opening it (`open_on_add`/`notify_on_add`) |
 | `:TodoToggle` | Toggle done state of task under cursor |
 | `:TodoDelete` | Delete task under cursor |
-| `:TodoList` | Open the window (alias of opening `:ScratchPad`) |
+| `:TodoList` | Open the window (alias of opening `:PinPad`) |
 | `:TodoPriority <low\|medium\|high>` | Set priority of task under cursor |
 
 All cursor-based commands operate on the task mapped to the current buffer line.
@@ -165,8 +165,8 @@ Example (icons on):
 ☐ 🟢 Escribir documentación
 ```
 
-- Highlight groups: `ScratchPadHigh`, `ScratchPadMedium`, `ScratchPadLow`,
-  `ScratchPadDone` (dimmed/strikethrough for completed text).
+- Highlight groups: `PinPadHigh`, `PinPadMedium`, `PinPadLow`,
+  `PinPadDone` (dimmed/strikethrough for completed text).
 - A line→task index map is rebuilt on every render so mappings/commands can
   resolve the task under the cursor.
 - Auto-sort (`sort = true`, default on): pending tasks first, then by priority
@@ -179,15 +179,15 @@ Example (icons on):
 ## 8. Module structure
 
 ```
-scratchpad.nvim/
-├── lua/scratchpad/
+pinpad.nvim/
+├── lua/pinpad/
 │   ├── init.lua        -- setup(), public API, command/keymap wiring
 │   ├── config.lua      -- defaults + deep-merge user opts
 │   ├── store.lua       -- task model, ids, JSON load/save
 │   ├── ui.lua          -- float window lifecycle + render + line map
 │   ├── actions.lua     -- add/toggle/delete/priority mutations
 │   └── highlights.lua  -- highlight groups + icon resolution
-├── plugin/scratchpad.lua  -- declares :ScratchPad, :TodoAdd, ... (lazy-safe)
+├── plugin/pinpad.lua  -- declares :PinPad, :TodoAdd, ... (lazy-safe)
 ├── README.md
 └── SPEC.md (this file)
 ```
@@ -205,7 +205,7 @@ Responsibility split:
 - Empty list => show a placeholder hint line ("No tasks — press o to add").
 - Cursor on placeholder/blank line => mutation commands no-op gracefully.
 - `:TodoPriority` with invalid arg => error message, no change.
-- Window already open => `:ScratchPad` closes it (toggle).
+- Window already open => `:PinPad` closes it (toggle).
 - Multiple instances/tabs => single shared buffer reused.
 - Concurrent external edits to JSON => last-write-wins (documented limitation).
 
@@ -217,7 +217,7 @@ Responsibility split:
 2. **Store** — in-memory tasks, id generation, JSON load/save.
 3. **UI** — float window open/close, render with line→task map.
 4. **Actions + mappings** — toggle/delete/add/priority wired to buffer keys.
-5. **Commands** — `:ScratchPad`, `:TodoAdd`, `:TodoToggle`, `:TodoDelete`, `:TodoList`, `:TodoPriority`.
+5. **Commands** — `:PinPad`, `:TodoAdd`, `:TodoToggle`, `:TodoDelete`, `:TodoList`, `:TodoPriority`.
 6. **Highlights + icons** — colored dots, done styling, text fallback.
 7. **Polish** — README, edge cases, optional sort flag.
 

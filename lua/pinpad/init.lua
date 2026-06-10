@@ -1,64 +1,64 @@
-local config = require("scratchpad.config")
+local config = require("pinpad.config")
 
 local M = {}
 
----@param opts ScratchPadConfig|nil
+---@param opts PinPadConfig|nil
 function M.setup(opts)
   config.setup(opts)
 
-  require("scratchpad.highlights").setup()
-  require("scratchpad.store").load()
+  require("pinpad.highlights").setup()
+  require("pinpad.store").load()
 
   M._setup_keymaps()
 end
 
 function M._setup_keymaps()
   local k = config.options.keymaps or {}
-  local actions = require("scratchpad.actions")
-  local ui = require("scratchpad.ui")
+  local actions = require("pinpad.actions")
+  local ui = require("pinpad.ui")
 
   if k.add then
     vim.keymap.set("n", k.add, function()
       actions.add()
-    end, { silent = true, desc = "ScratchPad: add todo" })
+    end, { silent = true, desc = "PinPad: add todo" })
   end
   if k.toggle then
     vim.keymap.set("n", k.toggle, function()
       ui.toggle()
-    end, { silent = true, desc = "ScratchPad: toggle window" })
+    end, { silent = true, desc = "PinPad: toggle window" })
   end
 end
 
 -- Public API ---------------------------------------------------------------
 
 function M.open()
-  require("scratchpad.ui").open()
+  require("pinpad.ui").open()
 end
 
 function M.close()
-  require("scratchpad.ui").close()
+  require("pinpad.ui").close()
 end
 
 function M.toggle()
-  require("scratchpad.ui").toggle()
+  require("pinpad.ui").toggle()
 end
 
 ---@param text? string
 function M.add(text)
-  require("scratchpad.actions").add(text)
+  require("pinpad.actions").add(text)
 end
 
 function M.toggle_task()
-  require("scratchpad.actions").toggle()
+  require("pinpad.actions").toggle()
 end
 
 function M.delete_task()
-  require("scratchpad.actions").delete()
+  require("pinpad.actions").delete()
 end
 
 ---@param priority "low"|"medium"|"high"
 function M.set_priority(priority)
-  require("scratchpad.actions").set_priority_cursor(priority)
+  require("pinpad.actions").set_priority_cursor(priority)
 end
 
 return M

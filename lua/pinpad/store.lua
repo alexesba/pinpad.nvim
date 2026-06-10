@@ -1,14 +1,14 @@
-local config = require("scratchpad.config")
+local config = require("pinpad.config")
 
 local M = {}
 
----@class ScratchPadTask
+---@class PinPadTask
 ---@field id string
 ---@field text string
 ---@field done boolean
 ---@field priority "low"|"medium"|"high"
 
----@type ScratchPadTask[]
+---@type PinPadTask[]
 M.tasks = {}
 
 local PRIORITIES = { "low", "medium", "high" }
@@ -53,7 +53,7 @@ function M.load()
 
   local ok, decoded = pcall(vim.json.decode, content)
   if not ok or type(decoded) ~= "table" then
-    vim.notify("[ScratchPad] Could not parse " .. path .. ", starting empty.", vim.log.levels.WARN)
+    vim.notify("[PinPad] Could not parse " .. path .. ", starting empty.", vim.log.levels.WARN)
     loaded = true
     return
   end
@@ -92,13 +92,13 @@ function M.save()
 
   local ok, encoded = pcall(vim.json.encode, M.tasks)
   if not ok then
-    vim.notify("[ScratchPad] Failed to encode tasks.", vim.log.levels.ERROR)
+    vim.notify("[PinPad] Failed to encode tasks.", vim.log.levels.ERROR)
     return
   end
 
   local fd = io.open(path, "w")
   if not fd then
-    vim.notify("[ScratchPad] Cannot write " .. path, vim.log.levels.ERROR)
+    vim.notify("[PinPad] Cannot write " .. path, vim.log.levels.ERROR)
     return
   end
   fd:write(encoded)
@@ -108,7 +108,7 @@ end
 ---@param text string
 ---@param priority? "low"|"medium"|"high"
 ---@param index? integer  -- 1-based insertion position; defaults to end
----@return ScratchPadTask|nil
+---@return PinPadTask|nil
 function M.add(text, priority, index)
   text = vim.trim(text or "")
   if text == "" then
