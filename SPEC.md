@@ -99,7 +99,7 @@ All cursor-based commands operate on the task mapped to the current buffer line.
 
 | Key | Action |
 |---|---|
-| `<CR>` | Edit task text in a floating editor (insert mode; Esc → normal, then `<CR>` saves & closes, `<C-c>`/`q` cancel) |
+| `<CR>` | Edit task text in a floating editor (insert mode; `<CR>` saves & closes, `<Esc>`/`<C-c>` cancels & closes) |
 | `x` | Toggle done |
 | `dd` | Delete task |
 | `V` + `d` | Visual line mode: delete all selected tasks in bulk (resolves selected display lines → task ids, removes them, notifies count) |

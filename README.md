@@ -24,6 +24,18 @@ and delete tasks with Vim-style keys — with optional JSON persistence across s
   color comes from highlight groups. Set `show_icons = false` for an ASCII
   fallback (`[ ]`/`[x]`, `[H]/[M]/[L]`), or swap in Nerd Font glyphs via `icons`.
 
+## Dependencies
+
+**None.** pinpad.nvim has no required dependencies — it relies only on built-in
+Neovim APIs, so it works the same with any plugin manager (lazy.nvim, packer,
+vim-plug, mini.deps, paq, or a manual `runtimepath` setup).
+
+[which-key.nvim](https://github.com/folke/which-key.nvim) is an **optional**
+enhancement: when installed, the `g?` / `<C-w>` cheat-sheet is rendered as a
+which-key popup (scoped to the current buffer's keys). Without it, the same keys
+are shown via a plain `vim.notify` list — nothing breaks either way. To opt in,
+just install which-key normally; no extra pinpad configuration is needed.
+
 ## Installation
 
 ### lazy.nvim
@@ -111,7 +123,7 @@ require("pinpad").setup({
 | Key | Action |
 |---|---|
 | `x` | Toggle done |
-| `<CR>` | Edit task text in a floating editor (Esc → normal mode, then `<CR>` saves; `<C-c>`/`q` cancel) |
+| `<CR>` | Edit task text in a floating editor (`<CR>` saves & closes, `<Esc>` cancels) |
 | `dd` | Delete task |
 | `V` then `d` | Select multiple tasks (visual line mode) and delete them in bulk |
 | `V` then `x` | Toggle done on all selected tasks (completes all, or un-completes if all already done) |
@@ -130,10 +142,6 @@ of which-key's window menu.
 
 All in-window mappings are buffer-local, and the buffer is non-modifiable, so
 your global `p`, `dd`, `<`, `>` behavior is never affected elsewhere.
-
-Inside both the pad and the edit modal, `<C-w>` is remapped to show this
-buffer's bindings (instead of which-key's window menu / window-switching). Close
-the pad with `q` / `<Esc>` / `:PinPad`.
 
 ## Persistence format
 

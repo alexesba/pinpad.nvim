@@ -267,8 +267,7 @@ function M.toggle()
 end
 
 ---Open a small floating editor for a single task's text.
----<CR> opens it (in insert mode); Esc returns to normal mode, then <CR> saves
----& closes; <C-c> or q cancels.
+---Opens in insert mode: <CR> saves & closes, <Esc> (or <C-c>) cancels & closes.
 ---@param index integer  -- task index in store
 function M.edit_entry(index)
   store.ensure_loaded()
@@ -334,21 +333,23 @@ function M.edit_entry(index)
   local function mapd(mode, lhs, fn, desc)
     vim.keymap.set(mode, lhs, fn, { buffer = buf, nowait = true, silent = true, desc = desc })
   end
-  -- Flow: <Esc> leaves insert mode (native), then <CR> in normal mode saves & closes.
-  mapd("n", "<CR>", function()
+  local function save_close()
+    vim.cmd("stopinsert")
     finish(true)
-  end, "Save & close")
-  -- Ctrl-C / q: cancel without saving.
-  mapd("i", "<C-c>", function()
+  end
+  local function cancel_close()
     vim.cmd("stopinsert")
     finish(false)
-  end, "Cancel (discard)")
-  mapd("n", "<C-c>", function()
-    finish(false)
-  end, "Cancel (discard)")
-  mapd("n", "q", function()
-    finish(false)
-  end, "Cancel (discard)")
+  end
+  -- Flow: <CR> saves & closes; <Esc> cancels (discards) & closes — from insert
+  -- mode directly, so editing is a single keystroke in either direction.
+  mapd("i", "<CR>", save_close, "Save & close")
+  mapd("n", "<CR>", save_close, "Save & close")
+  mapd("i", "<Esc>", cancel_close, "Cancel (discard)")
+  mapd("n", "<Esc>", cancel_close, "Cancel (discard)")
+  mapd("i", "<C-c>", cancel_close, "Cancel (discard)")
+  mapd("n", "<C-c>", cancel_close, "Cancel (discard)")
+  mapd("n", "q", cancel_close, "Cancel (discard)")
   mapd("n", "g?", function()
     M.show_help("Edit task")
   end, "Show keymaps")
