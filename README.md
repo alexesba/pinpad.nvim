@@ -12,6 +12,7 @@ and delete tasks with Vim-style keys — with optional JSON persistence across s
   cursor follows the task as it moves. Disable with `sort = false`.
 - Bulk actions: select tasks in visual line mode (`V`), then `d` to delete or
   `x` to toggle done on all of them.
+- Undo deletes with `u` — single or bulk, restored to their original positions.
 - Colored priority dots + checkboxes, with a plain-text fallback.
 - Vim-native, buffer-local mappings (`x`, `dd`, `o`, `O`, `p`, `>`, `<`).
 - Optional JSON persistence at `stdpath("data")/pinpad.json`.
@@ -95,6 +96,7 @@ require("pinpad").setup({
     rotate_priority = "p",
     priority_up = ">",
     priority_down = "<",
+    undo = "u",                   -- restore the most recently deleted task(s)
     quit = "q",
     help = "g?",                  -- show a cheat-sheet (which-key or notification)
   },
@@ -125,6 +127,7 @@ require("pinpad").setup({
 | `x` | Toggle done |
 | `<CR>` | Edit task text in a floating editor (`<CR>` saves & closes, `<Esc>` cancels) |
 | `dd` | Delete task |
+| `u` | Undo the most recent delete (restores task(s) to their original spot) |
 | `V` then `d` | Select multiple tasks (visual line mode) and delete them in bulk |
 | `V` then `x` | Toggle done on all selected tasks (completes all, or un-completes if all already done) |
 | `o` / `O` | Add task below / above (prompts for text) |
