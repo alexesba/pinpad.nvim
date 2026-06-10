@@ -11,14 +11,14 @@ priority levels, and JSON persistence across sessions.
 
 ### Goals
 - A single floating window that lists tasks and lets you manage them with Vim keys.
-- Each task has: text, done state, priority (`low | medium | high`).
+- Each task has: text, done state, priority (`low | medium | high`), optional due date.
 - Optional persistence to JSON across sessions.
 - Idiomatic `setup()` config; works with `lazy.nvim` / `packer` / native packages.
 - Sensible defaults; zero config required to be useful.
 
 ### Non-goals (v1)
 - No sync across machines, no remote backends.
-- No due dates, tags, sub-tasks, or recurring tasks (candidates for later).
+- No tags, sub-tasks, or recurring tasks (candidates for later).
 - No Telescope/fzf integration (later).
 
 ---
@@ -90,6 +90,7 @@ When `show_icons = false`, the renderer falls back to text markers:
 | `:TodoDelete` | Delete task under cursor |
 | `:TodoList` | Open the window (alias of opening `:PinPad`) |
 | `:TodoPriority <low\|medium\|high>` | Set priority of task under cursor |
+| `:TodoDue [date]` | Set/clear due date of task under cursor. Accepts ISO `YYYY-MM-DD`, `today`/`tomorrow`/`yesterday`, `+Nd`/`+Nw` (and `-`), or `clear`/blank; prompts via `vim.ui.input` when no arg |
 
 All cursor-based commands operate on the task mapped to the current buffer line.
 
@@ -110,6 +111,7 @@ All cursor-based commands operate on the task mapped to the current buffer line.
 | `p` | Rotate priority `low→medium→high→low` |
 | `>` | Raise priority |
 | `<` | Lower priority |
+| `D` | Set/clear due date (prompts via `vim.ui.input`; parses ISO + relative input via `date.parse`; blank/`clear` removes it) |
 | `q` / `<Esc>` | Close window |
 | `g?` / `<C-w>` | Cheat-sheet of buffer-local keys (which-key `show({ global = false })`, else notification fallback) |
 | `j` / `k` | Move between tasks (native) |
@@ -134,6 +136,7 @@ so global `p`, `<`, `>`, `dd` semantics are never disturbed outside the window.
   text = "Implementar función X",
   done = false,
   priority = "medium",      -- "low" | "medium" | "high"
+  due = "2026-06-12",       -- optional ISO date; nil/absent when unset
 }
 ```
 
@@ -141,10 +144,12 @@ so global `p`, `<`, `>`, `dd` semantics are never disturbed outside the window.
 ```json
 [
   { "id": "1", "text": "Revisar PR #42", "done": true,  "priority": "high" },
-  { "id": "2", "text": "Implementar función X", "done": false, "priority": "medium" },
+  { "id": "2", "text": "Implementar función X", "done": false, "priority": "medium", "due": "2026-06-12" },
   { "id": "3", "text": "Escribir documentación", "done": false, "priority": "low" }
 ]
 ```
+
+- `due` is validated on load (`date.is_valid`); malformed values are dropped.
 
 - Encode/decode via `vim.json.encode` / `vim.json.decode`.
 - Save on every mutation when `persist = true` (debounced is a later optimization).
@@ -167,7 +172,11 @@ Example (icons on):
 ```
 
 - Highlight groups: `PinPadHigh`, `PinPadMedium`, `PinPadLow`,
-  `PinPadDone` (dimmed/strikethrough for completed text).
+  `PinPadDone` (dimmed/strikethrough for completed text), `PinPadOverdue`
+  (red/bold) and `PinPadDueSoon` (orange) for due-date hints.
+- Pending tasks with a `due` date get a relative suffix, e.g. `(today)`,
+  `(in 3d)`, `(overdue (2d))`, colored by `date.status` (overdue/soon/later →
+  overdue/due-soon/hint). Completed tasks keep the strikethrough over the suffix.
 - A line→task index map is rebuilt on every render so mappings/commands can
   resolve the task under the cursor.
 - Auto-sort (`sort = true`, default on): pending tasks first, then by priority
@@ -184,9 +193,10 @@ pinpad.nvim/
 ├── lua/pinpad/
 │   ├── init.lua        -- setup(), public API, command/keymap wiring
 │   ├── config.lua      -- defaults + deep-merge user opts
-│   ├── store.lua       -- task model, ids, JSON load/save
+│   ├── store.lua       -- task model, ids, JSON load/save, undo
+│   ├── date.lua        -- pure ISO-date helpers (parse/offset/diff/labels)
 │   ├── ui.lua          -- float window lifecycle + render + line map
-│   ├── actions.lua     -- add/toggle/delete/priority mutations
+│   ├── actions.lua     -- add/toggle/delete/priority/due mutations
 │   └── highlights.lua  -- highlight groups + icon resolution
 ├── plugin/pinpad.lua  -- declares :PinPad, :TodoAdd, ... (lazy-safe)
 ├── README.md
@@ -206,6 +216,7 @@ Responsibility split:
 - Empty list => show a placeholder hint line ("No tasks — press o to add").
 - Cursor on placeholder/blank line => mutation commands no-op gracefully.
 - `:TodoPriority` with invalid arg => error message, no change.
+- `:TodoDue` / `D` with an unparseable date => error message, no change; blank/`clear` removes the date.
 - Window already open => `:PinPad` closes it (toggle).
 - Multiple instances/tabs => single shared buffer reused.
 - Concurrent external edits to JSON => last-write-wins (documented limitation).
@@ -218,7 +229,7 @@ Responsibility split:
 2. **Store** — in-memory tasks, id generation, JSON load/save.
 3. **UI** — float window open/close, render with line→task map.
 4. **Actions + mappings** — toggle/delete/add/priority wired to buffer keys.
-5. **Commands** — `:PinPad`, `:TodoAdd`, `:TodoToggle`, `:TodoDelete`, `:TodoList`, `:TodoPriority`.
+5. **Commands** — `:PinPad`, `:TodoAdd`, `:TodoToggle`, `:TodoDelete`, `:TodoList`, `:TodoPriority`, `:TodoDue`.
 6. **Highlights + icons** — colored dots, done styling, text fallback.
 7. **Polish** — README, edge cases, optional sort flag.
 
