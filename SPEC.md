@@ -91,6 +91,7 @@ When `show_icons = false`, the renderer falls back to text markers:
 | `:TodoList` | Open the window (alias of opening `:PinPad`) |
 | `:TodoPriority <low\|medium\|high>` | Set priority of task under cursor |
 | `:TodoDue [date]` | Set/clear due date of task under cursor. Accepts ISO `YYYY-MM-DD`, `today`/`tomorrow`/`yesterday`, `+Nd`/`+Nw` (and `-`), or `clear`/blank; prompts via `vim.ui.input` when no arg |
+| `:TodoToday` | Open the pad filtered to tasks due today or overdue |
 
 All cursor-based commands operate on the task mapped to the current buffer line.
 
@@ -112,6 +113,7 @@ All cursor-based commands operate on the task mapped to the current buffer line.
 | `>` | Raise priority |
 | `<` | Lower priority |
 | `D` | Set/clear due date (prompts via `vim.ui.input`; parses ISO + relative input via `date.parse`; blank/`clear` removes it) |
+| `T` | Toggle today/overdue filter (shows only tasks with `due` today or in the past; title appends `(today)`) |
 | `q` / `<Esc>` | Close window |
 | `g?` / `<C-w>` | Cheat-sheet of buffer-local keys (which-key `show({ global = false })`, else notification fallback) |
 | `j` / `k` | Move between tasks (native) |
@@ -180,9 +182,12 @@ Example (icons on):
 - A line→task index map is rebuilt on every render so mappings/commands can
   resolve the task under the cursor.
 - Auto-sort (`sort = true`, default on): pending tasks first, then by priority
-  `high → medium → low`; done items sink to the bottom. Stable tiebreak on
-  insertion order so equal items don't jump. Display-only — on-disk order is the
-  raw insertion order. The cursor follows a task when its priority/done changes.
+  `high → medium → low`; within equal priority, by due date ascending (earliest
+  first, undated last) when `sort_by_due = true`. Done items sink to the bottom.
+  Stable tiebreak on insertion order. Display-only — on-disk order is the raw
+  insertion order. The cursor follows a task when its priority/done changes.
+- Filter (`filter = "today"`): display-only subset — tasks whose `due` is today
+  or overdue. Toggled with `T`; reset to `all` when the window closes.
 
 ---
 
@@ -195,6 +200,7 @@ pinpad.nvim/
 │   ├── config.lua      -- defaults + deep-merge user opts
 │   ├── store.lua       -- task model, ids, JSON load/save, undo
 │   ├── date.lua        -- pure ISO-date helpers (parse/offset/diff/labels)
+│   ├── sort.lua        -- display sort compare + filter helpers
 │   ├── ui.lua          -- float window lifecycle + render + line map
 │   ├── actions.lua     -- add/toggle/delete/priority/due mutations
 │   └── highlights.lua  -- highlight groups + icon resolution
