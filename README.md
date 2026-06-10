@@ -143,6 +143,19 @@ of which-key's window menu.
 All in-window mappings are buffer-local, and the buffer is non-modifiable, so
 your global `p`, `dd`, `<`, `>` behavior is never affected elsewhere.
 
+## Development
+
+Tests use a tiny, dependency-free harness that runs under headless Neovim
+(no plenary/busted needed). From the project root:
+
+```bash
+make test        # or: nvim -l tests/run.lua
+```
+
+Specs live in `tests/*_spec.lua` and use the globals `describe` / `it` / `eq` /
+`ok` defined by `tests/run.lua`. The runner exits non-zero on any failure, so
+it drops straight into CI.
+
 ## Persistence format
 
 ```json
