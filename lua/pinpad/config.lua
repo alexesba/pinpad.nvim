@@ -24,6 +24,7 @@ local M = {}
 ---@field priority_down string|false
 ---@field set_due string|false
 ---@field filter_today string|false
+---@field clear_done string|false
 ---@field undo string|false
 ---@field quit string|false
 ---@field help string|false
@@ -88,6 +89,7 @@ M.defaults = {
     priority_down = "<",
     set_due = "D", -- set/clear a due date (prompts; accepts ISO date or +Nd/today/...)
     filter_today = "T", -- toggle today/overdue filter view
+    clear_done = "Z", -- remove all completed tasks (undoable with u)
     undo = "u", -- restore the most recently deleted task(s)
     quit = "q",
     help = "g?",

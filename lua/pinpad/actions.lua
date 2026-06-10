@@ -129,6 +129,21 @@ function M.toggle_today_filter()
   ui().toggle_today_filter()
 end
 
+---Remove all completed tasks (undoable with u).
+function M.clear_done()
+  store.ensure_loaded()
+  local removed = store.clear_done()
+  ui().render()
+  if removed == 0 then
+    vim.notify("[PinPad] No completed tasks to clear", vim.log.levels.INFO)
+    return
+  end
+  vim.notify(
+    string.format("[PinPad] Cleared %d completed task%s", removed, removed == 1 and "" or "s"),
+    vim.log.levels.INFO
+  )
+end
+
 ---Restore the most recently deleted task(s).
 function M.undo()
   store.ensure_loaded()
@@ -292,6 +307,7 @@ function M.attach_mappings(buf)
     M.set_due()
   end, "PinPad: set due date")
   map(m.filter_today, M.toggle_today_filter, "PinPad: toggle today filter")
+  map(m.clear_done, M.clear_done, "PinPad: clear completed tasks")
   map(m.undo, M.undo, "PinPad: undo delete")
   map(m.quit, function()
     ui().close()

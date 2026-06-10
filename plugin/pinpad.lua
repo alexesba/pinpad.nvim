@@ -50,3 +50,7 @@ end, {
 vim.api.nvim_create_user_command("TodoToday", function()
   sp().show_today()
 end, { desc = "Open the pad filtered to today and overdue tasks" })
+
+vim.api.nvim_create_user_command("TodoClearDone", function()
+  sp().clear_done()
+end, { desc = "Remove all completed tasks (undoable with u in the pad)" })
