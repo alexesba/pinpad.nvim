@@ -6,6 +6,8 @@ M.groups = {
   low = "PinPadLow",
   done = "PinPadDone",
   hint = "PinPadHint",
+  overdue = "PinPadOverdue",
+  due_soon = "PinPadDueSoon",
 }
 
 ---Define default highlight groups (only sets defaults; user overrides win).
@@ -18,6 +20,8 @@ function M.setup()
   set(M.groups.low, { fg = "#4ade80" }) -- green
   set(M.groups.done, { fg = "#6b7280", strikethrough = true }) -- dim + strike
   set(M.groups.hint, { fg = "#6b7280", italic = true })
+  set(M.groups.overdue, { fg = "#ef4444", bold = true }) -- red, emphasised
+  set(M.groups.due_soon, { fg = "#fb923c" }) -- orange
 end
 
 ---@param priority "low"|"medium"|"high"

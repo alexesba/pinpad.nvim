@@ -1,6 +1,7 @@
 local config = require("pinpad.config")
 local store = require("pinpad.store")
 local hl = require("pinpad.highlights")
+local date = require("pinpad.date")
 
 local M = {}
 
@@ -134,8 +135,23 @@ local function format_task(task)
   local dot_start = #prefix
   local dot_end = dot_start + #dot
   table.insert(highlights, { group = hl.priority_group(task.priority), s = dot_start, e = dot_end })
+
+  -- Optional due-date suffix, e.g. "  (in 3d)" / "  (overdue (2d))".
+  local due_start
+  if task.due then
+    due_start = #line
+    line = line .. "  (" .. date.relative_label(task.due) .. ")"
+  end
+
   if task.done then
+    -- Strikethrough covers the whole text + any due suffix.
     table.insert(highlights, { group = hl.groups.done, s = dot_end + 1, e = -1 })
+  elseif task.due then
+    local status = date.status(task.due)
+    local group = (status == "overdue" and hl.groups.overdue)
+      or (status == "soon" and hl.groups.due_soon)
+      or hl.groups.hint
+    table.insert(highlights, { group = group, s = due_start, e = -1 })
   end
   return line, highlights
 end

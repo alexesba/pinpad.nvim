@@ -61,4 +61,9 @@ function M.set_priority(priority)
   require("pinpad.actions").set_priority_cursor(priority)
 end
 
+---@param due? string  -- ISO date / relative (+Nd, today, ...) / "clear" / nil to prompt
+function M.set_due(due)
+  require("pinpad.actions").set_due(due)
+end
+
 return M

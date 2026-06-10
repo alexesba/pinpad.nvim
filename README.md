@@ -13,6 +13,9 @@ and delete tasks with Vim-style keys — with optional JSON persistence across s
 - Bulk actions: select tasks in visual line mode (`V`), then `d` to delete or
   `x` to toggle done on all of them.
 - Undo deletes with `u` — single or bulk, restored to their original positions.
+- Optional due dates with `D` — shown as a relative hint (`today`, `in 3d`,
+  `overdue (2d)`) and colored by urgency. Accepts ISO dates or shorthands like
+  `today` / `tomorrow` / `+3d` / `+2w`.
 - Colored priority dots + checkboxes, with a plain-text fallback.
 - Vim-native, buffer-local mappings (`x`, `dd`, `o`, `O`, `p`, `>`, `<`).
 - Optional JSON persistence at `stdpath("data")/pinpad.json`.
@@ -96,6 +99,7 @@ require("pinpad").setup({
     rotate_priority = "p",
     priority_up = ">",
     priority_down = "<",
+    set_due = "D",                -- set/clear a due date (prompts; ISO or +Nd/today/...)
     undo = "u",                   -- restore the most recently deleted task(s)
     quit = "q",
     help = "g?",                  -- show a cheat-sheet (which-key or notification)
@@ -119,6 +123,7 @@ require("pinpad").setup({
 | `:TodoToggle` | Toggle done state of the task under the cursor |
 | `:TodoDelete` | Delete the task under the cursor |
 | `:TodoPriority {low\|medium\|high}` | Set priority of the task under the cursor |
+| `:TodoDue [date]` | Set/clear the due date of the task under the cursor (in the pad). Accepts an ISO date, `today`/`tomorrow`, `+Nd`/`+Nw`, or `clear`; prompts when omitted |
 
 ## In-window mappings
 
@@ -133,6 +138,7 @@ require("pinpad").setup({
 | `o` / `O` | Add task below / above (prompts for text) |
 | `p` | Rotate priority `low → medium → high → low` |
 | `>` / `<` | Raise / lower priority |
+| `D` | Set/clear due date (prompts; accepts ISO date, `today`, `+3d`, `+2w`, or blank to clear) |
 | `q` / `<Esc>` | Close window |
 | `g?` / `<C-w>` | Show a cheat-sheet of this buffer's keys (which-key when installed) |
 | `j` / `k` | Move between tasks |

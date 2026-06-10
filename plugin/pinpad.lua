@@ -36,3 +36,13 @@ end, {
   end,
   desc = "Set priority of the task under the cursor",
 })
+
+vim.api.nvim_create_user_command("TodoDue", function(opts)
+  sp().set_due(opts.args ~= "" and opts.args or nil)
+end, {
+  nargs = "*",
+  complete = function()
+    return { "today", "tomorrow", "+1d", "+3d", "+1w", "clear" }
+  end,
+  desc = "Set/clear due date of the task under the cursor (in the pad)",
+})

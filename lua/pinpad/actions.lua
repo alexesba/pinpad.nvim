@@ -84,6 +84,46 @@ function M.toggle_visual()
   ui().render()
 end
 
+---Set or clear the due date of the task under the cursor.
+---@param preset? string  -- applied directly when given ("" / "clear" => clear);
+---                          otherwise prompts via vim.ui.input
+function M.set_due(preset)
+  local index = ui().task_under_cursor()
+  if not index then
+    return
+  end
+
+  local function apply(input)
+    if input == nil then
+      return -- prompt cancelled
+    end
+    local trimmed = vim.trim(input)
+    if trimmed == "" or trimmed:lower() == "clear" then
+      store.set_due(index, nil)
+      ui().render()
+      ui().focus_index(index)
+      vim.notify("[PinPad] Due date cleared", vim.log.levels.INFO)
+      return
+    end
+    local parsed = require("pinpad.date").parse(trimmed)
+    if not parsed then
+      vim.notify("[PinPad] Invalid date: " .. trimmed, vim.log.levels.ERROR)
+      return
+    end
+    store.set_due(index, parsed)
+    ui().render()
+    ui().focus_index(index)
+    vim.notify("[PinPad] Due " .. parsed, vim.log.levels.INFO)
+  end
+
+  if preset ~= nil then
+    apply(preset)
+  else
+    local current = (store.tasks[index] and store.tasks[index].due) or ""
+    vim.ui.input({ prompt = "Due (YYYY-MM-DD, today, +3d, blank=clear): ", default = current }, apply)
+  end
+end
+
 ---Restore the most recently deleted task(s).
 function M.undo()
   store.ensure_loaded()
@@ -243,6 +283,9 @@ function M.attach_mappings(buf)
   map(m.rotate_priority, M.rotate_priority, "PinPad: rotate priority")
   map(m.priority_up, M.priority_up, "PinPad: raise priority")
   map(m.priority_down, M.priority_down, "PinPad: lower priority")
+  map(m.set_due, function()
+    M.set_due()
+  end, "PinPad: set due date")
   map(m.undo, M.undo, "PinPad: undo delete")
   map(m.quit, function()
     ui().close()

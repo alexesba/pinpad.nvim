@@ -22,6 +22,7 @@ local M = {}
 ---@field rotate_priority string|false
 ---@field priority_up string|false
 ---@field priority_down string|false
+---@field set_due string|false
 ---@field undo string|false
 ---@field quit string|false
 ---@field help string|false
@@ -82,6 +83,7 @@ M.defaults = {
     rotate_priority = "p",
     priority_up = ">",
     priority_down = "<",
+    set_due = "D", -- set/clear a due date (prompts; accepts ISO date or +Nd/today/...)
     undo = "u", -- restore the most recently deleted task(s)
     quit = "q",
     help = "g?",

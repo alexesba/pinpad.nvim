@@ -7,6 +7,7 @@ local M = {}
 ---@field text string
 ---@field done boolean
 ---@field priority "low"|"medium"|"high"
+---@field due string|nil  -- optional due date, ISO "YYYY-MM-DD"
 
 ---@type PinPadTask[]
 M.tasks = {}
@@ -78,6 +79,7 @@ function M.load()
     return
   end
 
+  local date = require("pinpad.date")
   for _, item in ipairs(decoded) do
     if type(item) == "table" and type(item.text) == "string" then
       table.insert(M.tasks, {
@@ -85,6 +87,7 @@ function M.load()
         text = item.text,
         done = item.done == true,
         priority = M.is_valid_priority(item.priority) and item.priority or config.options.default_priority,
+        due = (type(item.due) == "string" and date.is_valid(item.due)) and item.due or nil,
       })
     end
   end
@@ -161,6 +164,25 @@ function M.set_text(index, text)
     return
   end
   t.text = text
+  M.save()
+end
+
+---Set or clear a task's due date. Pass a normalised "YYYY-MM-DD" to set, or
+---nil/"" to clear. Invalid strings are ignored (callers should pre-validate).
+---@param index integer
+---@param due string|nil
+function M.set_due(index, due)
+  local t = M.tasks[index]
+  if not t then
+    return
+  end
+  if due == nil or due == "" then
+    t.due = nil
+  elseif require("pinpad.date").is_valid(due) then
+    t.due = due
+  else
+    return
+  end
   M.save()
 end
 
