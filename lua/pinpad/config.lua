@@ -23,6 +23,7 @@ local M = {}
 ---@field priority_up string|false
 ---@field priority_down string|false
 ---@field set_due string|false
+---@field filter_today string|false
 ---@field undo string|false
 ---@field quit string|false
 ---@field help string|false
@@ -38,6 +39,7 @@ local M = {}
 ---@field add_priority "low"|"medium"|"high"|"ask"|nil
 ---@field show_icons boolean
 ---@field sort boolean
+---@field sort_by_due boolean
 ---@field open_on_add boolean
 ---@field notify_on_add boolean
 ---@field window PinPadWindowOpts
@@ -55,6 +57,7 @@ M.defaults = {
   add_priority = "low",
   show_icons = true,
   sort = true, -- auto-sort: pending first, then high->medium->low (stable)
+  sort_by_due = true, -- within equal priority, sort by due date (earliest first; undated last)
   open_on_add = false, -- open the pad after :TodoAdd (false => quick-capture)
   notify_on_add = true, -- show a confirmation notification when a task is added
 
@@ -84,6 +87,7 @@ M.defaults = {
     priority_up = ">",
     priority_down = "<",
     set_due = "D", -- set/clear a due date (prompts; accepts ISO date or +Nd/today/...)
+    filter_today = "T", -- toggle today/overdue filter view
     undo = "u", -- restore the most recently deleted task(s)
     quit = "q",
     help = "g?",

@@ -66,4 +66,8 @@ function M.set_due(due)
   require("pinpad.actions").set_due(due)
 end
 
+function M.show_today()
+  require("pinpad.ui").show_today()
+end
+
 return M

@@ -46,3 +46,7 @@ end, {
   end,
   desc = "Set/clear due date of the task under the cursor (in the pad)",
 })
+
+vim.api.nvim_create_user_command("TodoToday", function()
+  sp().show_today()
+end, { desc = "Open the pad filtered to today and overdue tasks" })
