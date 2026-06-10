@@ -14,6 +14,8 @@ and delete tasks with Vim-style keys — with optional JSON persistence across s
 - Floating window todo-list with priorities (`low` / `medium` / `high`).
 - Auto-sorts by priority as you change it (pending first, then high → low); the
   cursor follows the task as it moves. Disable with `sort = false`.
+- Bulk actions: select tasks in visual line mode (`V`), then `d` to delete or
+  `x` to toggle done on all of them.
 - Colored priority dots + checkboxes, with a plain-text fallback.
 - Vim-native, buffer-local mappings (`x`, `dd`, `o`, `O`, `p`, `>`, `<`).
 - Optional JSON persistence at `stdpath("data")/scratchpad.json`.
@@ -115,6 +117,8 @@ require("scratchpad").setup({
 | `x` | Toggle done |
 | `<CR>` | Edit task text in a floating editor (Esc → normal mode, then `<CR>` saves; `<C-c>`/`q` cancel) |
 | `dd` | Delete task |
+| `V` then `d` | Select multiple tasks (visual line mode) and delete them in bulk |
+| `V` then `x` | Toggle done on all selected tasks (completes all, or un-completes if all already done) |
 | `o` / `O` | Add task below / above (prompts for text) |
 | `p` | Rotate priority `low → medium → high → low` |
 | `>` / `<` | Raise / lower priority |

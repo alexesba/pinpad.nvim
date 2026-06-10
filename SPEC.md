@@ -102,6 +102,8 @@ All cursor-based commands operate on the task mapped to the current buffer line.
 | `<CR>` | Edit task text in a floating editor (insert mode; Esc → normal, then `<CR>` saves & closes, `<C-c>`/`q` cancel) |
 | `x` | Toggle done |
 | `dd` | Delete task |
+| `V` + `d` | Visual line mode: delete all selected tasks in bulk (resolves selected display lines → task ids, removes them, notifies count) |
+| `V` + `x` | Visual line mode: toggle done on all selected (smart — completes all, or un-completes if every selected is already done) |
 | `o` | Add new task below (prompt for text, default priority) |
 | `O` | Add new task above |
 | `p` | Rotate priority `low→medium→high→low` |

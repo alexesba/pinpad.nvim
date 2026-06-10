@@ -163,6 +163,51 @@ function M.delete(index)
   M.save()
 end
 
+---Set the done state for every task whose id is in the list. Returns count changed.
+---@param ids string[]
+---@param done boolean
+---@return integer
+function M.set_done_ids(ids, done)
+  local set = {}
+  for _, id in ipairs(ids) do
+    set[id] = true
+  end
+  local changed = 0
+  for _, t in ipairs(M.tasks) do
+    if set[t.id] and t.done ~= done then
+      t.done = done
+      changed = changed + 1
+    end
+  end
+  if changed > 0 then
+    M.save()
+  end
+  return changed
+end
+
+---Delete every task whose id is in the given list. Returns the count removed.
+---@param ids string[]
+---@return integer
+function M.delete_ids(ids)
+  local set = {}
+  for _, id in ipairs(ids) do
+    set[id] = true
+  end
+  local kept, removed = {}, 0
+  for _, t in ipairs(M.tasks) do
+    if set[t.id] then
+      removed = removed + 1
+    else
+      kept[#kept + 1] = t
+    end
+  end
+  if removed > 0 then
+    M.tasks = kept
+    M.save()
+  end
+  return removed
+end
+
 ---@param index integer
 ---@param priority "low"|"medium"|"high"
 function M.set_priority(index, priority)

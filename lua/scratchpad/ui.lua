@@ -41,7 +41,7 @@ function M.show_help(title)
   end
   local buf = vim.api.nvim_get_current_buf()
   local seen, lines = {}, {}
-  for _, mode in ipairs({ "n", "i" }) do
+  for _, mode in ipairs({ "n", "x", "i" }) do
     for _, m in ipairs(vim.api.nvim_buf_get_keymap(buf, mode)) do
       local key = (m.lhs or "") .. "\0" .. (m.desc or "")
       if m.desc and m.desc ~= "" and not seen[key] then
@@ -54,6 +54,24 @@ function M.show_help(title)
     lines = { "(no mappings)" }
   end
   vim.notify((title or "ScratchPad") .. " keys:\n" .. table.concat(lines, "\n"), vim.log.levels.INFO)
+end
+
+---Resolve the store task indices for an inclusive range of display lines.
+---@param first integer  -- 1-based display line
+---@param last integer   -- 1-based display line
+---@return integer[]     -- store task indices (unsorted, may be empty)
+function M.tasks_in_range(first, last)
+  if first > last then
+    first, last = last, first
+  end
+  local indices = {}
+  for line = first, last do
+    local idx = line_to_task[line]
+    if idx then
+      indices[#indices + 1] = idx
+    end
+  end
+  return indices
 end
 
 ---Move the cursor onto the display line for a given store task index.

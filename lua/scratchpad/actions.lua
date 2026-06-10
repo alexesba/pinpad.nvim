@@ -35,6 +35,55 @@ function M.delete()
   end)
 end
 
+---Resolve the task ids covered by the current visual selection, then leave
+---visual mode so window/buffer state is settled before any re-render.
+---@return string[] ids, ScratchPadTask[] tasks
+local function visual_selection()
+  local first = vim.fn.line("v")
+  local last = vim.fn.line(".")
+  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "n", false)
+  local ids, tasks = {}, {}
+  for _, idx in ipairs(ui().tasks_in_range(first, last)) do
+    local t = store.tasks[idx]
+    if t then
+      ids[#ids + 1] = t.id
+      tasks[#tasks + 1] = t
+    end
+  end
+  return ids, tasks
+end
+
+---Delete every task covered by the current visual selection.
+function M.delete_visual()
+  local ids = visual_selection()
+  if #ids == 0 then
+    return
+  end
+  local removed = store.delete_ids(ids)
+  ui().render()
+  if removed > 0 then
+    vim.notify(string.format("[ScratchPad] Deleted %d task%s", removed, removed == 1 and "" or "s"), vim.log.levels.INFO)
+  end
+end
+
+---Toggle done for every task in the current visual selection. Smart toggle:
+---if all selected are already done, un-complete them; otherwise complete all.
+function M.toggle_visual()
+  local ids, tasks = visual_selection()
+  if #ids == 0 then
+    return
+  end
+  local all_done = true
+  for _, t in ipairs(tasks) do
+    if not t.done then
+      all_done = false
+      break
+    end
+  end
+  store.set_done_ids(ids, not all_done)
+  ui().render()
+end
+
 function M.rotate_priority()
   with_cursor_task(function(i)
     store.rotate_priority(i)
@@ -164,6 +213,12 @@ function M.attach_mappings(buf)
   map(m.toggle, M.toggle, "ScratchPad: toggle done")
   map(m.edit, M.edit, "ScratchPad: edit task text")
   map(m.delete, M.delete, "ScratchPad: delete task")
+  -- Visual selection mirrors normal mode: d = delete, x = toggle done (bulk).
+  local vmap = function(lhs, fn, desc)
+    vim.keymap.set("x", lhs, fn, { buffer = buf, nowait = true, silent = true, desc = desc })
+  end
+  vmap("d", M.delete_visual, "ScratchPad: delete selected tasks")
+  vmap("x", M.toggle_visual, "ScratchPad: toggle selected done")
   map(m.add_below, function()
     M.add_relative(true)
   end, "ScratchPad: add below")
