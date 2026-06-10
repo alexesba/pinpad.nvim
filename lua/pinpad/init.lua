@@ -70,4 +70,8 @@ function M.show_today()
   require("pinpad.ui").show_today()
 end
 
+function M.clear_done()
+  require("pinpad.actions").clear_done()
+end
+
 return M
