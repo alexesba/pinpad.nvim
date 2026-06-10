@@ -20,6 +20,8 @@ and delete tasks with Vim-style keys — with optional JSON persistence across s
 - Auto-sorts by due date within the same priority (earliest first; undated last).
 - **Today view** — `T` toggles a filter for overdue + due-today tasks;
   `:TodoToday` opens the pad in that view.
+- **Search & filter** — `/` filters by text; `f` cycles all/pending/done;
+  `F` cycles priority. Filters compose and show in the window title.
 - Colored priority dots + checkboxes, with a plain-text fallback.
 - Vim-native, buffer-local mappings (`x`, `dd`, `o`, `O`, `p`, `>`, `<`).
 - Optional JSON persistence at `stdpath("data")/pinpad.json`.
@@ -106,6 +108,9 @@ require("pinpad").setup({
     priority_down = "<",
     set_due = "D",                -- set/clear a due date (prompts; ISO or +Nd/today/...)
     filter_today = "T",           -- toggle today/overdue filter view
+    search = "/",                 -- filter by task text (blank clears)
+    filter_done = "f",            -- cycle done filter: all → pending → done
+    filter_priority = "F",        -- cycle priority filter: all → high → medium → low
     clear_done = "Z",             -- remove all completed tasks (undoable with u)
     undo = "u",                   -- restore the most recently deleted task(s)
     quit = "q",
@@ -149,7 +154,10 @@ require("pinpad").setup({
 | `p` | Rotate priority `low → medium → high → low` |
 | `>` / `<` | Raise / lower priority |
 | `D` | Set/clear due date (prompts; accepts ISO date, `today`, `+3d`, `+2w`, or blank to clear) |
-| `T` | Toggle today/overdue filter (title shows `(today)` while active) |
+| `T` | Toggle today/overdue filter (title shows active filters while on) |
+| `/` | Search/filter by task text (blank input clears the search) |
+| `f` | Cycle done filter: all → pending → done |
+| `F` | Cycle priority filter: all → high → medium → low |
 | `q` / `<Esc>` | Close window |
 | `g?` / `<C-w>` | Show a cheat-sheet of this buffer's keys (which-key when installed) |
 | `j` / `k` | Move between tasks |
