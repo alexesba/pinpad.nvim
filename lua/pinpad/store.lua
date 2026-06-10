@@ -253,6 +253,21 @@ function M.delete_ids(ids)
   return #items
 end
 
+---Remove every completed task. Returns the count removed (undoable via `u`).
+---@return integer
+function M.clear_done()
+  local ids = {}
+  for _, t in ipairs(M.tasks) do
+    if t.done then
+      ids[#ids + 1] = t.id
+    end
+  end
+  if #ids == 0 then
+    return 0
+  end
+  return M.delete_ids(ids)
+end
+
 ---Restore the tasks removed by the most recent delete. Re-inserts them at their
 ---original positions (clamped if the list has since changed). Returns the count.
 ---@return integer
