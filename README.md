@@ -13,6 +13,7 @@ and delete tasks with Vim-style keys — with optional JSON persistence across s
 - Bulk actions: select tasks in visual line mode (`V`), then `d` to delete or
   `x` to toggle done on all of them.
 - Undo deletes with `u` — single or bulk, restored to their original positions.
+- Clear completed tasks with `Z` or `:TodoClearDone` (undoable with `u`).
 - Optional due dates with `D` — shown as a relative hint (`today`, `in 3d`,
   `overdue (2d)`) and colored by urgency. Accepts ISO dates or shorthands like
   `today` / `tomorrow` / `+3d` / `+2w`.
@@ -105,6 +106,7 @@ require("pinpad").setup({
     priority_down = "<",
     set_due = "D",                -- set/clear a due date (prompts; ISO or +Nd/today/...)
     filter_today = "T",           -- toggle today/overdue filter view
+    clear_done = "Z",             -- remove all completed tasks (undoable with u)
     undo = "u",                   -- restore the most recently deleted task(s)
     quit = "q",
     help = "g?",                  -- show a cheat-sheet (which-key or notification)
@@ -130,6 +132,7 @@ require("pinpad").setup({
 | `:TodoPriority {low\|medium\|high}` | Set priority of the task under the cursor |
 | `:TodoDue [date]` | Set/clear the due date of the task under the cursor (in the pad). Accepts an ISO date, `today`/`tomorrow`, `+Nd`/`+Nw`, or `clear`; prompts when omitted |
 | `:TodoToday` | Open the pad filtered to tasks due today or overdue |
+| `:TodoClearDone` | Remove all completed tasks (undoable with `u` in the pad) |
 
 ## In-window mappings
 
@@ -139,6 +142,7 @@ require("pinpad").setup({
 | `<CR>` | Edit task text in a floating editor (`<CR>` saves & closes, `<Esc>` cancels) |
 | `dd` | Delete task |
 | `u` | Undo the most recent delete (restores task(s) to their original spot) |
+| `Z` | Clear all completed tasks (undoable with `u`) |
 | `V` then `d` | Select multiple tasks (visual line mode) and delete them in bulk |
 | `V` then `x` | Toggle done on all selected tasks (completes all, or un-completes if all already done) |
 | `o` / `O` | Add task below / above (prompts for text) |

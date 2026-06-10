@@ -92,6 +92,7 @@ When `show_icons = false`, the renderer falls back to text markers:
 | `:TodoPriority <low\|medium\|high>` | Set priority of task under cursor |
 | `:TodoDue [date]` | Set/clear due date of task under cursor. Accepts ISO `YYYY-MM-DD`, `today`/`tomorrow`/`yesterday`, `+Nd`/`+Nw` (and `-`), or `clear`/blank; prompts via `vim.ui.input` when no arg |
 | `:TodoToday` | Open the pad filtered to tasks due today or overdue |
+| `:TodoClearDone` | Remove all completed tasks (undoable with `u` in the pad) |
 
 All cursor-based commands operate on the task mapped to the current buffer line.
 
@@ -105,6 +106,7 @@ All cursor-based commands operate on the task mapped to the current buffer line.
 | `x` | Toggle done |
 | `dd` | Delete task |
 | `u` | Undo the most recent delete (single or bulk); restores task(s) to their recorded positions. Bounded stack (25 deep), in-memory only |
+| `Z` | Clear all completed tasks in one step (recorded on the undo stack; restore with `u`) |
 | `V` + `d` | Visual line mode: delete all selected tasks in bulk (resolves selected display lines → task ids, removes them, notifies count) |
 | `V` + `x` | Visual line mode: toggle done on all selected (smart — completes all, or un-completes if every selected is already done) |
 | `o` | Add new task below (prompt for text, default priority) |
